@@ -1,0 +1,182 @@
+
+
+{% extends "base.html" %} {% load humanize %} {% load customfilter %} {% block pageContent %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --info-color: #3498db;
+            --danger-color: #e74c3c;
+            --bg-light-gray: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--bg-light-gray);
+            font-family: 'Arial', sans-serif;
+        }
+
+        .dashboard-card {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+        }
+
+        .dashboard-icon {
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .dashboard-card:hover .dashboard-icon {
+            transform: rotate(360deg);
+            color: #ffffff !important;
+        }
+
+        .card-body {
+            background: linear-gradient(145deg, #f1f3f5, #ffffff);
+        }
+
+        .dashboard-card .card-body {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-right: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .dashboard-card:hover .icon-container {
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        .data-container {
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .count-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .count-label {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            animation: slideUp 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .dashboard-card {
+                margin-bottom: 15px;
+            }
+            .icon-container {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Total Posts Card -->
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <div class="card dashboard-card shadow border-0">
+                    <div class="card-body">
+                        <div class="icon-container">
+                            <i class="fas fa-images fs-1 dashboard-icon text-primary"></i>
+                        </div>
+                        <div class="data-container">
+                            <div class="count-number">{{ total_posts|intcomma }}</div>
+                            <div class="count-label">Total Posts</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Users Card -->
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <div class="card dashboard-card shadow border-0">
+                    <div class="card-body">
+                        <div class="icon-container">
+                            <i class="fas fa-users fs-1 dashboard-icon text-success"></i>
+                        </div>
+                        <div class="data-container">
+                            <div class="count-number">{{ total_users|intcomma }}</div>
+                            <div class="count-label">Total Users</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Posts Card -->
+            <div class="col-lg-6 col-md-6 col-sm-12 mt-4">
+                <div class="card dashboard-card shadow border-0">
+                    <div class="card-body">
+                        <div class="icon-container">
+                            <i class="fas fa-user fs-1 dashboard-icon text-info"></i>
+                        </div>
+                        <div class="data-container">
+                            <div class="count-number">{{ personal_posts|intcomma }}</div>
+                            <div class="count-label">Your Total Posts</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Trash Card -->
+            <div class="col-lg-6 col-md-6 col-sm-12 mt-4">
+                <div class="card dashboard-card shadow border-0">
+                    <div class="card-body">
+                        <div class="icon-container">
+                            <i class="fas fa-trash fs-1 dashboard-icon text-danger"></i>
+                        </div>
+                        <div class="data-container">
+                            <div class="count-number">{{ personal_trash|intcomma }}</div>
+                            <div class="count-label">Your Trash</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional: Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    {% endblock pageContent %} 

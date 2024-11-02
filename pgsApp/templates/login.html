@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block pageContent %}
+<style>
+    :root {
+        --primary-color: #3498db;
+        --secondary-color: #2ecc71;
+        --background-color: #f0f2f5;
+        --text-color: #333;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .login-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 400px;
+        padding: 30px;
+        animation: fadeIn 0.6s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+    .login-header h2 {
+        color: var(--primary-color);
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px 12px 40px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #888;
+        transition: color 0.3s ease;
+    }
+
+    .form-control:focus + .input-icon {
+        color: var(--primary-color);
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .signup-link {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .signup-link a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .signup-link a:hover {
+        color: var(--secondary-color);
+        text-decoration: underline;
+    }
+
+    .err-msg {
+        margin-bottom: 15px;
+        animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+        20%, 40%, 60%, 80% { transform: translateX(10px); }
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-header">
+        <h2>Login</h2>
+    </div>
+    <form id="login-user" action="" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="text" class="form-control" id="username" name="username" required placeholder="Username" autocomplete="username">
+            <i class="input-icon fas fa-user"></i>
+        </div>
+        <div class="form-group">
+            <input type="password" class="form-control" id="password" name="password" required placeholder="Password" autocomplete="current-password">
+            <i class="input-icon fas fa-lock"></i>
+        </div>
+        <button type="submit" class="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+    </form>
+    <div class="signup-link">
+        Don't have an account? <a href="{% url 'register-page' %}">Sign Up</a>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<!-- Include Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<script>
+    $(function() {
+        $('#login-user').submit(function(e) {
+            e.preventDefault();
+            var _this = $(this)
+            $('.err-msg').remove();
+            var el = $('<div>')
+            el.addClass("alert alert-danger err-msg")
+            el.hide()
+            if (_this[0].checkValidity() == false) {
+                _this[0].reportValidity();
+                return false;
+            }
+            start_loader();
+            $.ajax({
+                headers: {
+                    "X-CSRFToken": '{{csrf_token}}'
+                },
+                url: "{% url 'login-user' %}",
+                data: new FormData($(this)[0]),
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                type: 'POST',
+                dataType: 'json',
+                error: err => {
+                    console.log(err)
+                    alert_toast("An error occurred", 'error');
+                    end_loader();
+                },
+                success: function(resp) {
+                    if (typeof resp == 'object' && resp.status == 'success') {
+                        location.href = "{% url 'home-page' %}"
+                    } else if (resp.status == 'failed' && !!resp.msg) {
+                        el.text(resp.msg)
+                        _this.prepend(el)
+                        el.show('slow')
+                    } else {
+                        el.text("An error occurred")
+                        _this.prepend(el)
+                        el.show('slow')
+                    }
+                    $("html, body, .modal").scrollTop(0);
+                    end_loader()
+                }
+            })
+        })
+    })
+</script>
+{% endblock ScriptBlock %}

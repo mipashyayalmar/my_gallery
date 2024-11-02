@@ -1,0 +1,114 @@
+{% load static %}
+<header>
+    <!-- Intro settings -->
+    <style>
+        #intro {
+            margin-top: 58px; /* Margin to fix overlapping fixed navbar */
+        }
+
+        @media (max-width: 991px) {
+            #intro {
+                margin-top: 45px; /* Adjust margin for smaller screens */
+            }
+        }
+
+        #uni_modal .modal-sub-footer {
+            display: none;
+        }
+    </style>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-gradient fixed-top shadow border-bottom">
+        <div class="container">
+            <!-- Navbar brand -->
+            <a class="navbar-brand" href="{% url 'home-page' %}">
+                <b>{{ system_name }}</b>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarExample01" aria-controls="navbarExample01" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarExample01">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="topNav">
+                    <!-- Main Navigation Links -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" aria-current="page" href="{% url 'home-page' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="upload-btn" aria-current="page" href="javascript:void(0)">Upload</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/gallery/' %}active{% endif %}" aria-current="page" href="{% url 'gallery-page' %}">My Photo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/trash/' %}active{% endif %}" aria-current="page" href="{% url 'trash-page' %}">Trash</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/all-uploads/' %}active{% endif %}" aria-current="page" href="{% url 'all-uploads' %}">Gallery</a>
+                    </li>
+                </ul>
+
+                <!-- User Navigation Links -->
+                <ul class="navbar-nav d-flex flex-row">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'profile-page' %}"><b>Hello, {{ user.username|title }}</b></a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav d-flex flex-row">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'all-users' %}"><b>All Users</b></a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav d-flex flex-row">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login-page' %}">Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Notifications Link with Count -->
+                <ul class="navbar-nav d-flex flex-row">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'notifications' %}">
+                            <b>Notifications</b>
+                            {% if notifications_count > 0 %}
+                                <span class="badge bg-danger">{{ notifications_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                </ul>
+                
+            </div>
+        </div>
+    </nav>
+    <!-- End Navbar -->
+
+    <!-- Jumbotron -->
+    <div id="intro" class="pt-2 text-center bg-light">
+        <!-- Optional content or title can be placed here -->
+    </div>
+    <!-- End Jumbotron -->
+</header>
+
+<script>
+    $(function() {
+        // Highlight active link in the navbar
+        $('#topNav .nav-link').each(function() {
+            const current = '{{ request.get_full_path }}';
+            if (current === $(this).attr('href')) {
+                $(this).parent().addClass('active');
+            }
+        });
+
+        // Open upload modal when upload button is clicked
+        $('#upload-btn').click(function() {
+            uni_modal("Upload New Image", "{% url 'upload-modal' %}");
+        });
+    });
+</script>

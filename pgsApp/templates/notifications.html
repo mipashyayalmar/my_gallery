@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% block pageContent %}
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .notifications-container {
+            max-width: 600px;
+            margin: 20px auto;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .notifications-header {
+            color: #1a1a1a;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .notification {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.2s ease;
+        }
+
+        .notification:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .notification-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            background-color: #e5e7eb;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #4b5563;
+            text-transform: uppercase;
+            font-size: 1rem;
+            border: 2px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .notification-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .notification-content {
+            flex-grow: 1;
+            margin-right: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-user {
+            color: #1a1a1a;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .notification-message {
+            color: #4b5563;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .delete-notification {
+            background: transparent;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-notification:hover {
+            background: #fee2e2;
+            transform: scale(1.1);
+        }
+
+        .delete-notification svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #6b7280;
+            padding: 2rem;
+            background: #f9fafb;
+            border-radius: 12px;
+            margin-top: 1rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
+
+        .notification.removing {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+
+        /* Default avatar colors based on first letter */
+        .avatar-a { background-color: #e3f2fd; color: #1976d2; }
+        .avatar-b { background-color: #f3e5f5; color: #7b1fa2; }
+        .avatar-c { background-color: #e8f5e9; color: #388e3c; }
+        .avatar-d { background-color: #fff3e0; color: #f57c00; }
+        .avatar-default { background-color: #f5f5f5; color: #616161; }
+
+        
+    </style>
+</head>
+<body>
+    <div class="notifications-container">
+        <h2 class="notifications-header">Your Notifications</h2>
+        {% for notification in notifications %}
+            <div class="notification">
+                <div class="notification-avatar {% if notification.user.profile_picture %}{% else %}avatar-{{ notification.user.username.0|lower|default:'default' }}{% endif %}">
+                    {% if notification.user.profile_picture %}
+                        <img src="{{ notification.user.profile_picture.url }}" alt="{{ notification.user.username }}">
+                    {% else %}
+                        {{ notification.user.username.0|upper }}
+                    {% endif %}
+                </div>
+                <div class="notification-content">
+                    <div class="notification-header">
+                        <span class="notification-user">{{ notification.user.username }}</span>
+                        <span class="notification-time">{{ notification.created_at }}</span>
+                    </div>
+                    <span class="notification-message">{{ notification.message }}</span>
+                </div>
+                <button class="delete-notification" data-id="{{ notification.id }}" title="Delete notification">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            </div>
+        {% empty %}
+            <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48" style="margin: 0 auto 1rem">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <p>No notifications to display.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).on('click', '.delete-notification', function() {
+            var notificationId = $(this).data('id');
+            var $notificationDiv = $(this).closest('.notification');
+            
+            $notificationDiv.addClass('removing');
+            
+            $.ajax({
+                url: '/notifications/delete/' + notificationId + '/',
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        setTimeout(function() {
+                            $notificationDiv.remove();
+                            
+                            if ($('.notification').length === 0) {
+                                $('.notifications-container').append(`
+                                    <div class="empty-state">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48" style="margin: 0 auto 1rem">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                                        </svg>
+                                        <p>No notifications to display.</p>
+                                    </div>
+                                `);
+                            }
+                        }, 300);
+                    } else {
+                        $notificationDiv.removeClass('removing');
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    $notificationDiv.removeClass('removing');
+                    alert('Error: Unable to delete notification.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+{% endblock pageContent %}

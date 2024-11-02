@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block pageContent %}
+<style>
+    .errorlist {
+        color: var(--bs-danger);
+        animation: shakeError 0.5s ease-in-out;
+        padding-left: 0;
+        list-style-type: none;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .card {
+        animation: slideUp 0.5s ease-out;
+        background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        border: none !important;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .card-header {
+        background: linear-gradient(45deg, #2193b0, #6dd5ed);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px 8px 0 0 !important;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 0.8rem;
+        transition: all 0.3s ease;
+        border: 2px solid #e0e0e0;
+    }
+
+    .form-control:focus {
+        box-shadow: none;
+        border-color: #2193b0;
+        transform: translateY(-2px);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .update-btn {
+        background: linear-gradient(45deg, #2193b0, #6dd5ed);
+        border: none;
+        padding: 0.8rem 2rem;
+        color: white;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .update-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(33, 147, 176, 0.3);
+    }
+
+    label {
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .password-strength {
+        height: 5px;
+        margin-top: 0.5rem;
+        border-radius: 3px;
+        transition: all 0.3s ease;
+    }
+
+    .strength-weak {
+        background: #ff4444;
+        width: 100%;
+    }
+    
+    .strength-strong {
+        background: #00C851;
+        width: 100%;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes shakeError {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-12 col-xs-12">
+            <div class="card card-default rounded-0 shadow">
+                <div class="card-header">
+                    <h4 class="card-title"><b>Update Account Details</b></h4>
+                </div>
+                <div class="card-body">
+                    <div class="container-fluid">
+                        <form id="update-user" method="POST" action="{% url 'update-profile' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mdc-layout-grid">
+                                <div class="mdc-layout-grid__inner">
+                                    <div class="form-group mb-3">
+                                        <label for="first_name" class="control-label">First Name</label>
+                                        <input type="text" class="form-control rounded-0" name="first_name" id="first_name" value="{% if form.data.first_name %}{{ form.data.first_name }}{% else %}{{ user.first_name }}{% endif %}" required="required">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="last_name" class="control-label">Last Name</label>
+                                        <input type="text" class="form-control rounded-0" name="last_name" id="last_name" value="{% if form.data.last_name %}{{ form.data.last_name }}{% else %}{{ user.last_name }}{% endif %}" required="required">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="username" class="control-label">Username</label>
+                                        <input type="text" class="form-control rounded-0" name="username" id="username" value="{% if form.data.username %}{{ form.data.username }}{% else %}{{ user.username }}{% endif %}" required="required">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="email" class="control-label">Email</label>
+                                        <input type="email" class="form-control rounded-0" name="email" id="email" value="{% if form.data.email %}{{ form.data.email }}{% else %}{{ user.email }}{% endif %}" required="required">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="current_password" class="control-label">Enter Password</label>
+                                        <input type="password" class="form-control rounded-0" name="current_password" id="current_password" required="required">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="new_password" class="control-label">Confirm Password</label>
+                                        <input type="password" class="form-control rounded-0" name="new_password" id="new_password">
+                                        <div class="password-strength"></div>
+                                    </div>
+                                    {% for field in form %}
+                                        {% for error in field.errors %}
+                                        <div class="alert alert-danger my-2">
+                                            <p>{{ error }}</p>
+                                        </div>
+                                        {% endfor %}
+                                    {% endfor %}
+                                    <div class="form-group mb-3">
+                                        <div class="d-flex w-100 justify-content-end">
+                                            <button class="btn btn-sm rounded-0 btn-primary col-4">
+                                                Update
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password strength indicator
+    const newPasswordInput = document.querySelector('input[name="new_password"]');
+    const strengthIndicator = document.querySelector('.password-strength');
+
+    if (newPasswordInput && strengthIndicator) {
+        newPasswordInput.addEventListener('input', function(e) {
+            const password = e.target.value;
+
+            // Check if password meets minimum length requirement
+            if (password.length >= 8) {
+                strengthIndicator.className = 'password-strength strength-strong';
+            } else {
+                strengthIndicator.className = 'password-strength strength-weak';
+            }
+        });
+    }
+
+    // Form submission animation
+    const form = document.getElementById('update-user');
+    form.addEventListener('submit', function() {
+        const btn = this.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+    });
+});
+</script>
+{% endblock pageContent %}

@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block pageContent %}
+<style>
+    .profile-card {
+        animation: slideIn 0.5s ease-out;
+        background: linear-gradient(145deg, #ffffff, #f0f0f0);
+        transition: all 0.3s ease;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    }
+
+    .profile-header {
+        background: linear-gradient(45deg, #2193b0, #6dd5ed);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px 8px 0 0;
+        animation: gradientFlow 8s ease infinite;
+    }
+
+    .profile-image-container {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .profile-image {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        border: 5px solid white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        animation: pulseAnimation 2s infinite;
+    }
+
+    .info-item {
+        padding: 0.8rem;
+        margin: 0.5rem 0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .info-item:hover {
+        background-color: rgba(0,0,0,0.05);
+    }
+
+    .profile-btn {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulseAnimation {
+        0% {
+            box-shadow: 0 0 0 0 rgba(33, 147, 176, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(33, 147, 176, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(33, 147, 176, 0);
+        }
+    }
+
+    @keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .color-theme-1 { background: linear-gradient(45deg, #2193b0, #6dd5ed); }
+    .color-theme-2 { background: linear-gradient(45deg, #ff6b6b, #ffc3a0); }
+    .color-theme-3 { background: linear-gradient(45deg, #4b6cb7, #182848); }
+</style>
+
+<div class="container ">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-10 col-sm-12 col-xs-12">
+            <div class="card profile-card border-0 rounded-3">
+                <div class="profile-header">
+                    <div class="h4 card-title fw-bold text-center mb-0">My Profile</div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="container-fluid">
+                        <div class="profile-image-container">
+                            <img src="" 
+                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2UyZTJlMiIvPjxjaXJjbGUgY3g9Ijc1IiBjeT0iNTUiIHI9IjI1IiBmaWxsPSIjOTA5MDkwIi8+PHBhdGggZD0iTTI1LDEyMCBRNzUsMTAwIDEyNSwxMjAiIGZpbGw9IiM5MDkwOTAiLz48L3N2Zz4='"
+                                 class="profile-image"
+                                 alt="Profile Picture">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="info-item">
+                                    <dt class="text-muted mb-1">Fullname</dt>
+                                    <dd class="ps-4 h5 mb-0">{{ user.first_name }} {{ user.last_name }}</dd>
+                                </div>
+                                <div class="info-item">
+                                    <dt class="text-muted mb-1">Email</dt>
+                                    <dd class="ps-4 h5 mb-0">{{ user.email }}</dd>
+                                </div>
+                                <div class="info-item">
+                                    <dt class="text-muted mb-1">Username</dt>
+                                    <dd class="ps-4 h5 mb-0">{{ user.username }}</dd>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent p-3">
+                    <div class="d-flex w-100 justify-content-end gap-2">
+                        <a href="{% url 'update-password' %}" 
+                           class="profile-btn btn btn-light border bg-gradient rounded-pill px-4 py-2">
+                            <i class="fas fa-key me-2"></i>Update Password
+                        </a>
+                        <a href="{% url 'update-profile' %}" 
+                           class="profile-btn btn btn-primary bg-gradient rounded-pill px-4 py-2">
+                            <i class="fas fa-user-edit me-2"></i>Update Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Color theme switcher (optional)
+    const themes = ['color-theme-1', 'color-theme-2', 'color-theme-3'];
+    let currentTheme = 0;
+
+    function switchTheme() {
+        const header = document.querySelector('.profile-header');
+        header.classList.remove(themes[currentTheme]);
+        currentTheme = (currentTheme + 1) % themes.length;
+        header.classList.add(themes[currentTheme]);
+    }
+
+    // Uncomment below line to enable automatic theme switching every 5 seconds
+    // setInterval(switchTheme, 5000);
+</script>
+{% endblock pageContent %}

@@ -1,0 +1,173 @@
+{% extends 'base.html' %} 
+{% block pageContent %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'assets/default/css/all_updates.css' %}">
+
+<section class="py-4 full-width-section">
+    <div class="container-fluid">
+        <h3 class="gallery-title fw-bolder text-center">Gallery</h3>
+        <center>
+            <hr class="gallery-line bg-primary opacity-100">
+        </center>
+
+        <!-- Search Input -->
+        <div class="search-box">
+            <form onsubmit="return false;">
+                <button class="btn-search"><i class="fas fa-search"></i></button>
+                <input type="text" id="search" name="search" class="input-search" placeholder="Search by caption or username" value="{{ request.GET.search }}">
+            </form>
+        </div>
+
+        <!-- Gallery items -->
+        <div class="row mt-4">
+            {% for photo in photos %}
+            <div class="col-lg-3 col-md-4 col-sm-6 col-12 p-2 thumb-item" data-caption="{{ photo.caption }}" data-username="{{ photo.user.username }}">
+                <div class="thumbnail-holder overflow-hidden">
+                    <a href="javascript:void(0)" data-img-url="{{ photo.image_path.url }}" class="view_image">
+                        <img src="{{ photo.thumbnail_path.url }}" alt="{{ photo.caption }}" class="img-fluid thumbnail-photo">
+                    </a>
+                </div>
+                <p class="text-center mt-2"><strong>
+                    <span class="caption" id="caption-{{ photo.id }}">
+                        {% if photo.caption|length > 30 %}
+                            {{ photo.caption|slice:":30" }}... 
+                            <a href="javascript:void(0);" onclick="toggleCaption('{{ photo.id }}')" style="font-size:10px">Show More</a>
+                            <span class="full-caption d-none">{{ photo.caption }}</span>
+                        {% else %}
+                            {{ photo.caption }}
+                        {% endif %}
+                    </span>
+                </strong>
+                <br>
+                {{ photo.user.username }}</p>
+                <p class="text-center text-muted">
+                     {{ photo.date_added|timesince }} ago
+                </p>
+                <div class="text-center">
+                    <button class="btn btn-sm btn-primary" id="like-button-{{ photo.id }}" onclick="toggleImageInteraction({{ photo.id }}, 'like')" {% if photo.user_interaction == 'like' %}style="background-color: blue;"{% endif %}>Like ({{ photo.likes }})</button>
+                    <button class="btn btn-sm btn-danger" id="dislike-button-{{ photo.id }}" onclick="toggleImageInteraction({{ photo.id }}, 'dislike')" {% if photo.user_interaction == 'dislike' %}style="background-color: red;"{% endif %}>Dislike ({{ photo.dislikes }})</button>
+                </div>
+                
+                
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if not photos %}
+        <center>
+            <small class='text-muted'><em>No images listed yet</em></small>
+        </center>
+        {% endif %}
+    </div>
+</section>
+
+{% block ScriptBlock %}
+<script>
+    // Disable right-click
+    document.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+    });
+
+    function updateButtonStyles(imageId, isLiked, isDisliked) {
+        const likeButton = document.getElementById(`like-button-${imageId}`);
+        const dislikeButton = document.getElementById(`dislike-button-${imageId}`);
+        
+        if (isLiked) {
+            likeButton.classList.add('active');
+            likeButton.style.backgroundColor = 'blue';  // Fill color for liked
+        } else {
+            likeButton.classList.remove('active');
+            likeButton.style.backgroundColor = ''; // Default color
+        }
+
+        if (isDisliked) {
+            dislikeButton.classList.add('active');
+            dislikeButton.style.backgroundColor = 'red'; // Fill color for disliked
+        } else {
+            dislikeButton.classList.remove('active');
+            dislikeButton.style.backgroundColor = ''; // Default color
+        }
+    }
+
+    function toggleImageInteraction(imageId, action) {
+        const button = event.target;
+        button.disabled = true;
+
+        fetch(`/image_interaction/${imageId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ action })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'liked' || data.status === 'disliked') {
+                updateLikeCount(imageId, data.likes);
+                updateDislikeCount(imageId, data.dislikes);
+                updateButtonStyles(imageId, data.status === 'liked', data.status === 'disliked');
+            } else if (data.status === 'unliked' || data.status === 'undisliked') {
+                updateButtonStyles(imageId, data.status === 'unliked', data.status === 'undisliked');
+            } else if (data.status === 'error') {
+                alert(data.message); // Show alert only on error
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.'); // Show alert on fetch error
+        })
+        .finally(() => {
+            button.disabled = false;
+        });
+    }
+
+    function updateLikeCount(imageId, likes) {
+        const likeButton = document.querySelector(`button[onclick="toggleImageInteraction(${imageId}, 'like')"]`);
+        likeButton.innerText = `Like (${likes})`;
+    }
+
+    function updateDislikeCount(imageId, dislikes) {
+        const dislikeButton = document.querySelector(`button[onclick="toggleImageInteraction(${imageId}, 'dislike')"]`);
+        dislikeButton.innerText = `Dislike (${dislikes})`;
+    }
+
+    $(function() {
+        $('.view_image').click(function() {
+            var img = $(this).attr('data-img-url');
+            $('#viewer_modal #img-viewer-field').attr('src', img);
+            $('#viewer_modal').modal('show');
+        });
+    });
+
+    function filterPhotos() {
+        const input = document.getElementById('search').value.toLowerCase();
+        const photoItems = document.querySelectorAll('.thumb-item');
+
+        photoItems.forEach(item => {
+            const caption = item.getAttribute('data-caption').toLowerCase();
+            const username = item.getAttribute('data-username').toLowerCase();
+            item.style.display = caption.includes(input) || username.includes(input) ? '' : 'none';
+        });
+    }
+
+    document.getElementById('search').addEventListener('input', filterPhotos);
+
+    function toggleCaption(photoId) {
+        const captionElement = document.getElementById(`caption-${photoId}`);
+        const fullCaption = captionElement.querySelector('.full-caption');
+        const isExpanded = !fullCaption.classList.contains('d-none');
+
+        if (isExpanded) {
+            captionElement.innerHTML = `${fullCaption.textContent.slice(0, 30)}... <a href="javascript:void(0);" onclick="toggleCaption('${photoId}')">Show More</a>`;
+            fullCaption.classList.add('d-none');
+        } else {
+            captionElement.innerHTML = `${fullCaption.textContent} <a href="javascript:void(0);" onclick="toggleCaption('${photoId}')">Show Less</a>`;
+            fullCaption.classList.remove('d-none');
+        }
+    }
+</script>
+{% endblock ScriptBlock %}
+
+{% endblock pageContent %}
